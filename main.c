@@ -12,40 +12,106 @@ typedef struct {
     int potion;
 }Personnage;
 
+Personnage monstre[10] = {
+    // EASY
+    {500,10,0,0,0},
+ {200,30,0,0,0},
+ {1000,15,0,0,0},
+
+    // MEDIUM
+{400,20,0,10,0},
+{300,35,0,0,0},
+
+    // HARDCORE
+{2000,10,0,0,0},
+{120,50,0,0,0},
+{250,15,0,30,0},
+{600,40,0,0,0},
+{1200,45,0,20,0},
+
+};
+
+// Initialisation du nombre de monstre en fonction du choix de difficulté choisi par l'utilisateur
+int init_monstre () {
+    int choix_difficulte=0;
+    printf(" 1 | Easy - 3 monstres \n 2 | Medium - 5 monstres \n 3 | Hardcore - 10 monstres \n");
+    printf("Choisissez votre niveau de difficulte : ");
+    scanf ("%d", &choix_difficulte);
+
+    switch (choix_difficulte) {
+        case 1:
+            return 3; // EASY - 3 monstres
+        case 2:
+            return 5; // MEDIUM - 5 monstres
+        case 3:
+            return 10; // HARDCORE - 10 monstres
+        default:
+            return 3; // Par défaut (EASY)
+    }
+}
+
 // Permet d'initialiser les statistiques du joueur
 void init_joueur (Personnage *j) {
-    j->pv = 100;
-    j->degats = 50;
-    j->arme = 0;
-    j->armure = 0;
-    j->potion = 0;
-}
+    int choix_classe=0;
+    printf("-------------------------------------------------------\n");
+    printf("1 | Combattant | 120 PV | 50 ATK | 2 Armure | 1 Potion \n");
+    printf("2 | Mage | 80 PV | 55 ATK | 4 Potions \n");
+    printf("3 | Assassin | 75 PV | 75 ATK \n");
+    printf("4 | Tireur | 95 PV | 55 ATK | 1 Armure | 2 Potion \n");
+    printf("5 | Tank | 160 PV | 35 ATK | 4 Armure | 0 Potion \n");
+    printf("------------------------------------------------------\n");
+    printf("Choisissez votre classe : ");
+    scanf ("%d", &choix_classe);
 
-// Permet d'initialiser les statistiques du monstre
-void init_monstre (Personnage *m) {
-    m->pv = 500;
-    m->degats = 10;
-    m->arme = 0;
-    m->armure = 0;
-    m->potion = 0;
-}
+    switch (choix_classe) {
+        case 1 :
+            j->pv = 120;
+            j->degats = 50;
+            j->arme = 0;
+            j->armure = 2;
+            j->potion = 1;
+            break;
 
-// Permet d'initialiser les statistiques du deuxième monstre
-void init_monstre2 (Personnage *m2) {
-    m2->pv = 200;
-    m2->degats = 30;
-    m2->arme = 0;
-    m2->armure = 0;
-    m2->potion = 0;
-}
+        case 2:
+            j->pv = 80;
+            j->degats = 55;
+            j->arme = 0;
+            j->armure = 0;
+            j->potion = 4;
+            break;
 
-// Permet d'initialiser les statistiques du troisième monstre
-void init_monstre3 (Personnage *m3) {
-    m3->pv = 1000;
-    m3->degats = 15;
-    m3->arme = 0;
-    m3->armure = 0;
-    m3->potion = 0;
+        case 3:
+            j->pv = 75;
+            j->degats = 75;
+            j->arme = 0;
+            j->armure = 0;
+            j->potion = 0;
+            break;
+
+        case 4:
+            j->pv = 95;
+            j->degats = 55;
+            j->arme = 0;
+            j->armure = 1;
+            j->potion = 2;
+            break;
+
+        case 5:
+            j->pv = 160;
+            j->degats = 35;
+            j->arme = 0;
+            j->armure = 4;
+            j->potion = 0;
+            break;
+
+        default:
+            j->pv = 100;
+            j->degats = 50;
+            j->arme = 0;
+            j->armure = 0;
+            j->potion = 0;
+            break;
+    }
 }
 
 // AFFICHAGES
@@ -124,20 +190,24 @@ void combat (Personnage *j,Personnage *m) {
     }
 
     int choix_combat = 0;
-    int degats_joueur = j->degats + j->arme * 20;
-    printf("Quel choix ? \n | 1 | Attaque simple %d degats \n | 2 | Attaque speciale %d degats, 1 chance sur 2 \n | 3 | Soigner (+30pv)\n",degats_joueur,degats_joueur*2);
+
+    int attaque_joueur = j->degats + j->arme * 20; // Ajoute l'arme au dégâts de base du joueur
+    int attaque_simple = attaque_joueur - m->armure; // Ajoute l'armure du monstre aux dégâts totaux
+    int attaque_critique = (attaque_joueur * 2) - m->armure; // Ajoute l'armure du monstre aux dégâts totaux x2 (car coup critique)
+
+    printf("Quel choix ? \n | 1 | Attaque simple %d degats \n | 2 | Attaque speciale %d degats, 1 chance sur 2 \n | 3 | Soigner (+30pv)\n",attaque_simple,attaque_critique);
     scanf("%d",&choix_combat);
 
     switch (choix_combat) {
 
         case 1:
-            m->pv -= degats_joueur;
+            m->pv -= attaque_simple;
             j->pv -= degats_subis;
             break;
 
         case 2:
             if (rand()%2==1) {
-                m->pv -= degats_joueur*2;
+                m->pv -= attaque_critique;
                 printf("Coup critique !\n");
                 j->pv -= degats_subis;
             }
@@ -159,34 +229,9 @@ void combat (Personnage *j,Personnage *m) {
             }
             break;
 
-        case 667: //Code de triche pour tuer le monstre
-            m->pv = 0;
-            break;
-
-        case 2727: //Code de triche pour se donner pv "infini"
-            j->pv += 9999;
-            break;
-
-        default:
-            j->pv -= degats_subis; //Empêche de spam un chiffre random pour attendre les coffres
-            break;
-    }
-}
-
-void changement_monstre(Personnage *m, Personnage *m2, Personnage *m3) {
-    if (m->pv <= 0) {
-        if (m2->pv > 0) {
-            printf("Vous avez vaincu le monstre !\n");
-            printf("ATTENTION ! Un deuxieme monstre apparait !\n\n");
-            *m = *m2;
-            m2->pv = 0;
-        }
-        else if (m3->pv > 0) {
-            printf("Vous avez vaincu le deuxieme monstre !\n");
-            printf("ATTENTION ! Le boss final apparait !\n");
-            *m = *m3;
-            m3->pv = 0;
-        }
+            default:
+                j->pv -= degats_subis; //Empêche de spam un chiffre random pour attendre les coffres
+                break;
     }
 }
 
@@ -194,40 +239,46 @@ void changement_monstre(Personnage *m, Personnage *m2, Personnage *m3) {
 int main(){
 
     // Appel de la stucture qui définit les personnages
+    int index_monstre = 0;
     Personnage joueur;
-    Personnage monstre;
-    Personnage monstre2;
-    Personnage monstre3;
 
     // Appel de la fonction qui initialise les statistiques
+    int nb_monstres = init_monstre(); // Affecte le choix de difficulté du joueur (de init_monstre) à la variable du nb de monstre
     init_joueur(&joueur);
-    init_monstre(&monstre);
-    init_monstre2(&monstre2);
-    init_monstre3(&monstre3);
 
     // Permet au nombre random d'être différent à chaque partie
     srand(time(NULL));
-    while (joueur.pv > 0 && monstre.pv > 0) {
+
+    while (joueur.pv > 0 && index_monstre < nb_monstres) {
 
         //Affiche les PV du joueur et du monstre
-        affichage_pv(joueur,monstre);
+        affichage_pv(joueur,monstre[index_monstre]);
 
         //Propose un coffre au joueur
         if (rand()%10<3) {
             coffre(&joueur);
-            affichage_pv(joueur,monstre);
+            affichage_pv(joueur,monstre[index_monstre]);
             if (joueur.pv <= 0) {
                 break;
             }
         }
 
         //Lance la mécanique de combat
-        combat(&joueur,&monstre);
+        combat(&joueur,&monstre[index_monstre]);
 
-        //Vérifie si le monstre est mort pour passer au suivant
-        changement_monstre(&monstre,&monstre2,&monstre3);
+        // Vérifie si le monstre est mort et passe au suivant
+        if (monstre[index_monstre].pv <= 0) {
+            printf("Vous avez vaincu le monstre !\n");
+            index_monstre++; // Passe au monstre d'après
+        }
+
     }
 
     //Affiche le message de fin gagné ou perdu
-    win_or_lose(joueur,monstre);
+    if (index_monstre >= nb_monstres) {
+        win_or_lose(joueur, monstre[nb_monstres - 1]);
+    }
+    else {
+        win_or_lose(joueur, monstre[index_monstre]);
+    }
 }
